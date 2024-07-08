@@ -106,7 +106,7 @@ android {
 Ensure that your `ios/Podfile` is configured to support the necessary dependencies. Add the following lines to your `ios/Podfile` file:
 
 ```
-platform :ios, '10.0'
+platform :ios, '12.1'
 use_frameworks!
 ```
 

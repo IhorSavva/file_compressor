@@ -1,6 +1,6 @@
-name: file_compression_example
-description: A new Flutter project demonstrating the file_compression package.
-publish_to: "none" # This is so that the example isn't published to pub.dev.
+name: file_compressor_example
+description: A new Flutter project demonstrating the file_compressor package.
+publish_to: "none"
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -9,9 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
   file_compressor:
-    git:
-      url: https://github.com/IhorSavva/file_compressor.git
-      ref: main
+    path: ../../file_compressor
+  path_provider: ^2.1.3
 
 dev_dependencies:
   flutter_test:

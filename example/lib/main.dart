@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:file_compressor/file_compressor.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   runApp(MyApp());
@@ -26,22 +30,33 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final FileCompressor fileCompressor = FileCompressor();
 
+  Future<String> getFileFromAsset(String assetPath) async {
+    final byteData = await rootBundle.load(assetPath);
+    final tempDir = await getTemporaryDirectory();
+    final file = File(path.join(tempDir.path, path.basename(assetPath)));
+    await file.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    return file.path;
+  }
+
   Future<void> compressFiles() async {
     try {
+      final imageAssetPath = await getFileFromAsset('assets/test_image.jpg');
       final compressedImage = await fileCompressor.compressFile(
-        filePath: 'assets/test_image.jpg',
-        quality: 0.8,
+        filePath: imageAssetPath,
+        quality: 0.3,
         compressionType: CompressionType.image,
       );
 
+      final videoAssetPath = await getFileFromAsset('assets/test_video.mp4');
       final compressedVideo = await fileCompressor.compressFile(
-        filePath: 'assets/test_video.mp4',
-        quality: 0.8,
+        filePath: videoAssetPath,
+        quality: 0.9,
         compressionType: CompressionType.video,
       );
 
+      final audioAssetPath = await getFileFromAsset('assets/test_audio.mp3');
       final compressedAudio = await fileCompressor.compressFile(
-        filePath: 'assets/test_audio.mp3',
+        filePath: audioAssetPath,
         quality: 0.8,
         compressionType: CompressionType.audio,
       );
