@@ -52,26 +52,16 @@ class FileCompressor {
   }
 
   Future<String> _compressVideo(String filePath, double quality) async {
-    final videoInfo = await getVideoInfo(filePath);
-    final videoStream = videoInfo['streams']
-        .firstWhere((stream) => stream['codec_type'] == 'video');
-    final codecName = videoStream['codec_name'];
-
-    String codec;
-    if (codecName == 'h264') {
-      codec = 'libx264';
-    } else {
-      codec = 'mpeg4'; // default to mpeg4 for unsupported codecs
-    }
-
-    final bitrate = (quality * 1000).toInt();
+    final codecName = await _getCodecInfo(filePath);
+    final originalBitrate = await _getBitrate(filePath);
+    final bitrate = (originalBitrate * quality).toInt();
     final extension = path.extension(filePath).toLowerCase();
     final fileNameWithoutExtension = path.basenameWithoutExtension(filePath);
     final compressedFilePath = path.join(path.dirname(filePath),
         'compressed_$fileNameWithoutExtension$extension');
 
     final session = await FFmpegKit.execute(
-        '-y -i $filePath -c:v $codec -b:v ${bitrate}k -maxrate ${bitrate}k -bufsize ${bitrate}k $compressedFilePath');
+        '-y -i $filePath -c:v $codecName -b:v ${bitrate}k -maxrate ${bitrate}k -bufsize ${bitrate}k $compressedFilePath');
 
     final returnCode = await session.getReturnCode();
     final sessionLog = await session.getAllLogsAsString();
@@ -112,60 +102,48 @@ class FileCompressor {
 
     return compressedFilePath;
   }
-}
 
-Future<Map<String, dynamic>> getVideoInfo(String filePath) async {
-  getCodecInfo(filePath);
-  final session = await FFmpegKit.execute('-v quiet -print_format json -show_format -show_streams "$filePath"');
-  final returnCode = await session.getReturnCode();
-  final sessionOutput = await session.getOutput();
-  final sessionLogs = await session.getAllLogsAsString();
-  final sessionFailStackTrace = await session.getFailStackTrace();
+  Future<String> _getCodecInfo(String videoPath) async {
+    final command = "-i $videoPath";
+    final session = await FFmpegKit.execute(command);
 
-  print("FFprobe return code: $returnCode");
-  print("FFprobe session output: $sessionOutput");
-  print("FFprobe session logs: $sessionLogs");
-  print("FFprobe fail stack trace: $sessionFailStackTrace");
-
-  if (!ReturnCode.isSuccess(returnCode)) {
-    throw Exception('Failed to get video info');
-  }
-
-  return jsonDecode(sessionOutput ?? '{}') as Map<String, dynamic>;
-}
-
-void getCodecInfo(String videoPath) {
-  String command = "-i $videoPath";
-
-  FFmpegKit.execute(command).then((session) async {
-    final returnCode = await session.getReturnCode();
-    final output = await session.getLogsAsString();
-
-    if (ReturnCode.isSuccess(returnCode)) {
-      // Command executed successfully, parse the output for codec info
-      final codecInfo = parseCodecInfo(output);
-      print("Codec Info: $codecInfo");
-    } else {
-      // Command failed, handle the error
-      print("FFmpeg command failed with return code: $returnCode");
+    final logs = await session.getAllLogsAsString();
+    if (logs == null) {
+      throw Exception('Error getting logs from video');
     }
-  }).catchError((error) {
-    print("Error executing FFmpeg command: $error");
-  });
-}
 
-String parseCodecInfo(String output) {
-  // Parsing logic to extract codec information
-  final regex = RegExp(r'Stream #0:0.*: Video: (\w+)', multiLine: true);
-  final match = regex.firstMatch(output);
-  if (match != null) {
-    return match.group(1) ?? 'Unknown codec';
-  } else {
-    return 'Codec information not found';
+    return _parseCodecInfo(logs);
+  }
+
+  Future<int> _getBitrate(String videoPath) async {
+    final command = "-i $videoPath";
+    final session = await FFmpegKit.execute(command);
+
+    final logs = await session.getAllLogsAsString();
+    if (logs == null) {
+      throw Exception('Error getting logs from video');
+    }
+
+    return _parseBitrate(logs);
+  }
+
+  String _parseCodecInfo(String output) {
+    final regex = RegExp(r'Stream #0:0.*: Video: (\w+)', multiLine: true);
+    final match = regex.firstMatch(output);
+    if (match != null) {
+      return match.group(1) ?? '';
+    } else {
+      throw Exception('Codec information not found');
+    }
+  }
+
+  int _parseBitrate(String output) {
+    final regex = RegExp(r'bitrate: (\d+) kb/s', multiLine: true);
+    final match = regex.firstMatch(output);
+    if (match != null) {
+      return int.parse(match.group(1) ?? '0');
+    } else {
+      throw Exception('Bitrate information not found');
+    }
   }
 }
-
-
-
-
-
