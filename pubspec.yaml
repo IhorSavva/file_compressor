@@ -13,8 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  video_compress: ^3.1.2
-  ffmpeg_kit_flutter: ^6.0.3
+  ffmpeg_kit_flutter_full_gpl: ^6.0.3
   image: ^4.2.0
   path: ^1.9.0
 

@@ -103,12 +103,21 @@ android {
 
 ### iOS
 
-Ensure that your `ios/Podfile` is configured to support the necessary dependencies. Add the following lines to your `ios/Podfile` file:
+Ensure that your `ios/Podfile` is configured to support the necessary dependencies. Follow these steps:
 
 ```
 platform :ios, '12.1'
 use_frameworks!
 ```
+
+Add dependency to your `ios/Podfile`:
+
+```
+pod 'ffmpeg-kit-ios-full-gpl', '6.0'
+```
+
+and use 
+`cd ios && pod install`
 
 ### Example
 
