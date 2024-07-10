@@ -9,9 +9,9 @@ compression quality and maintaining aspect ratios. Supports common formats for e
 - Compress videos.
 - Compress audio files.
 - Supports both Android and iOS platforms.
-- Handles multiple formats for images (BMP, CUR, GIF, ICO, JPG, PNG, TGA, TIFF).
-- Handles multiple formats for videos (MP4, AVI, MOV, MKV, WMV).
-- Handles multiple formats for audio (MP3, AAC, WAV, OGG, FLAC).
+- Handle JPG format for images.
+- Handle MP4 format for videos.
+- Handle MP3 format for audio.
 
 ## Installation
 
@@ -88,22 +88,20 @@ Returns the file path of the compressed file.
 
 ### Android
 
-Ensure that your `android/app/build.gradle` is configured to support the necessary dependencies. Add the following lines to your `android/app/build.gradle file`:
+Ensure that your `android/app/build.gradle` is configured to support the necessary dependencies. Add
+the following lines to your `android/app/build.gradle file`:
 
 ```
-android {
-    // Your existing configurations
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+defaultConfig {
+ // Other existing configurations
+ minSdk = 24
 }
 ```
 
 ### iOS
 
-Ensure that your `ios/Podfile` is configured to support the necessary dependencies. Follow these steps:
+Ensure that your `ios/Podfile` is configured to support the necessary dependencies. Follow these
+steps:
 
 ```
 platform :ios, '12.1'
@@ -116,7 +114,7 @@ Add dependency to your `ios/Podfile`:
 pod 'ffmpeg-kit-ios-full-gpl', '6.0'
 ```
 
-and use 
+and use
 `cd ios && pod install`
 
 ### Example

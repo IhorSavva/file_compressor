@@ -33,6 +33,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final FileCompressor fileCompressor = FileCompressor();
+  bool isLoading = false;
 
   Future<String> getFileFromAsset(String assetPath) async {
     final byteData = await rootBundle.load(assetPath);
@@ -44,52 +45,61 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> compressFiles() async {
-    try {
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
       final imageAssetPath = await getFileFromAsset('assets/test_image.jpg');
       final compressedImage = await fileCompressor.compressFile(
-          filePath: imageAssetPath,
-          quality: 0.3,
-          compressionType: CompressionType.image,
-          resizingOption: ResizingOption.centerCrop
+        filePath: imageAssetPath,
+        quality: 0.3,
+        compressionType: CompressionType.image,
+        resizingOption: ResizingOption.centerCrop,
       );
 
-        final audioAssetPath = await getFileFromAsset('assets/test_audio.mp3');
-        final compressedAudio = await fileCompressor.compressFile(
-          filePath: audioAssetPath,
-          quality: 0.5,
-          compressionType: CompressionType.audio,
-        );
+      final audioAssetPath = await getFileFromAsset('assets/test_audio.mp3');
+      final compressedAudio = await fileCompressor.compressFile(
+        filePath: audioAssetPath,
+        quality: 0.5,
+        compressionType: CompressionType.audio,
+      );
 
+      final videoAssetPath = await getFileFromAsset('assets/test_video.mp4');
+      final compressedVideo = await fileCompressor.compressFile(
+        filePath: videoAssetPath,
+        quality: 0.5,
+        compressionType: CompressionType.video,
+      );
 
-
-        final videoAssetPath = await getFileFromAsset('assets/test_video.mp4');
-        final compressedVideo = await fileCompressor.compressFile(
-          filePath: videoAssetPath,
-          quality: 0.5,
-          compressionType: CompressionType.video,
-        );
-
-        print('Compressed image path: $compressedImage');
-        print('Compressed video path: $compressedVideo');
-        print('Compressed audio path: $compressedAudio');
+      print('Compressed image path: $compressedImage');
+      print('Compressed video path: $compressedVideo');
+      print('Compressed audio path: $compressedAudio');
     } catch (e) {
       print('Error compressing files: $e');
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('File Compression Example'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: compressFiles,
-          child: const Text('Compress Files'),
+        appBar: AppBar(
+          title: const Text('File Compression Example'),
         ),
-      ),
-    );
+        body: Center(
+          child: SizedBox(
+            width: 200,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : compressFiles,
+              child: isLoading
+                  ? const LinearProgressIndicator()
+                  : const Text('Compress Files'),
+            ),
+          ),
+        ));
   }
 }
