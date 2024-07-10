@@ -121,6 +121,12 @@ and use
 
 You can find an example usage of this package in the example directory.
 
+### TODO
+- Handles multiple formats for images (BMP, CUR, GIF, ICO, PNG, TGA, TIFF).
+- Handles multiple formats for videos (AVI, MOV, MKV, WMV).
+- Handles multiple formats for audio (AAC, WAV, OGG, FLAC).
+
+
 ### License
 
 [MIT License](LICENSE)
